@@ -1,0 +1,4 @@
+appname = rpimongo
+httpport = 8080
+runmode = dev
+NewrelicLicense = abcdefghijklmnopqrstuvwxyz0123456789
