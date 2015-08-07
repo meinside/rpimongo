@@ -3,13 +3,9 @@ package routers
 import (
 	"github.com/astaxie/beego"
 	"github.com/meinside/rpimongo/controllers"
-	"github.com/yvasiyarov/beego_gorelic"
 )
 
 func init() {
-	// newrelic monitoring
-	beego_gorelic.InitNewrelicAgent()
-
 	// index
 	beego.Router("/", &controllers.IndexController{})
 
