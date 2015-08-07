@@ -1,5 +1,5 @@
-//var DEBUG = false;
-var DEBUG = true;
+var DEBUG = false;
+//var DEBUG = true;
 
 var MONITOR_VALUES = [
 	"hostname",
