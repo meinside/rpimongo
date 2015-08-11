@@ -33,6 +33,8 @@ $ cd $GOPATH/src/github.com/meinside/rpimongo
 $ bee run
 ```
 
+then it can be accessed through: http://some.where:8088
+
 ## 4. run as service
 
 ### create init.d script
