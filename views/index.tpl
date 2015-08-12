@@ -55,23 +55,20 @@
 	<br/>
 </div>
 <script type="text/javascript">
+	// values for monitoring
+	var MONITOR_VALUES = [
+		"hostname",
+		"uptime",
+		"uname",
+		"cpu_info",
+		"cpu_temperature",
+		"free_spaces",
+		"memory_split",
+		"free_memory",
+	];
+
 	// on page load,
 	$(document).ready(function(){
-		var value, element;
-		var numValues = MONITOR_VALUES.length;
-		for(var i=0; i<numValues; i++)
-		{
-			value = MONITOR_VALUES[i];
-			element = $("#" + value);
-
-			// fetch value
-			fetch(value, element);
-
-			// bind refresh event
-			$("#refresh-" + value).click(function(event){
-				var value = event.currentTarget.id.replace(/^refresh-/, '');
-				fetch(value, $("#" + value));
-			});
-		}
+		fetchValues(MONITOR_VALUES);
 	});
 </script>

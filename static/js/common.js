@@ -1,17 +1,6 @@
 var DEBUG = false;
 //var DEBUG = true;
 
-var MONITOR_VALUES = [
-	"hostname",
-	"uptime",
-	"uname",
-	"cpu_info",
-	"cpu_temperature",
-	"free_spaces",
-	"memory_split",
-	"free_memory",
-];
-
 var SPINNER_OPTIONS = {
 	color: "#A0A0A0",
 	length: 3,
@@ -31,9 +20,9 @@ function debugLog(log)
 }
 
 /*
- * for fetching values from /api
+ * for fetching given value from /api and render it to renderer
  */
-function fetch(value, renderer)
+function fetchAndRender(value, renderer)
 {
 	debugLog("< fetching " + value + "...");
 
@@ -53,4 +42,27 @@ function fetch(value, renderer)
 			renderer.spin(false);
 		},
 		"json");
+}
+
+/*
+ * fetch multiple /api values
+ */
+function fetchValues(values)
+{
+	var value, element;
+	var numValues = values.length;
+	for(var i=0; i<numValues; i++)
+	{
+		value = values[i];
+		element = $("#" + value);
+
+		// fetch and render value
+		fetchAndRender(value, element);
+
+		// bind refresh event
+		$("#refresh-" + value).click(function(event){
+			var value = event.currentTarget.id.replace(/^refresh-/, '');
+			fetchAndRender(value, $("#" + value));
+		});
+	}
 }
