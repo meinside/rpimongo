@@ -3,12 +3,11 @@ package rpi
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 )
 
 func getHostname() (result string, success bool) {
 	output, err := exec.Command("hostname").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -19,7 +18,7 @@ func getHostname() (result string, success bool) {
 
 func getUname() (result string, success bool) {
 	output, err := exec.Command("uname", "-a").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -30,7 +29,7 @@ func getUname() (result string, success bool) {
 
 func getUptime() (result string, success bool) {
 	output, err := exec.Command("uptime").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -41,7 +40,7 @@ func getUptime() (result string, success bool) {
 
 func getFreeSpaces() (result string, success bool) {
 	output, err := exec.Command("df", "-h").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -53,7 +52,7 @@ func getFreeSpaces() (result string, success bool) {
 func getMemorySplit() (result string, success bool) {
 	// arm memory
 	output, err := exec.Command("vcgencmd", "get_mem", "arm").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -62,7 +61,7 @@ func getMemorySplit() (result string, success bool) {
 	// gpu memory
 	if success {
 		output, err = exec.Command("vcgencmd", "get_mem", "gpu").CombinedOutput()
-		result = result + "\n" + strings.TrimSpace(string(output))
+		result = result + string(output)
 		if err == nil {
 			success = true
 		} else {
@@ -74,7 +73,7 @@ func getMemorySplit() (result string, success bool) {
 
 func getFreeMemory() (result string, success bool) {
 	output, err := exec.Command("free", "-o", "-h").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -85,7 +84,7 @@ func getFreeMemory() (result string, success bool) {
 
 func getCpuTemperature() (result string, success bool) {
 	output, err := exec.Command("vcgencmd", "measure_temp").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
@@ -96,7 +95,7 @@ func getCpuTemperature() (result string, success bool) {
 
 func getCpuInfo() (result string, success bool) {
 	output, err := exec.Command("cat", "/proc/cpuinfo").CombinedOutput()
-	result = strings.TrimSpace(string(output))
+	result = string(output)
 	if err == nil {
 		success = true
 	} else {
