@@ -1,5 +1,5 @@
 <h3>
-  Raspberry Pi Monitoring with Go
+	Raspberry Pi Monitoring with Go
 </h3>
 
 <div class="server-stat">
@@ -57,14 +57,14 @@
 <script type="text/javascript">
 	// values for monitoring
 	var MONITOR_VALUES = [
-		"hostname",
-		"uptime",
-		"uname",
-		"cpu_info",
-		"cpu_temperature",
-		"free_spaces",
-		"memory_split",
-		"free_memory",
+		'hostname',
+		'uptime',
+		'uname',
+		'cpu_info',
+		'cpu_temperature',
+		'free_spaces',
+		'memory_split',
+		'free_memory',
 	];
 
 	// on page load,
