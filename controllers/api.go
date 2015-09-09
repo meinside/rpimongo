@@ -14,6 +14,11 @@ type ApiController struct {
 	beego.Controller
 }
 
+// @Title read
+// @Description Query status from server
+// @Param method path string   true        "status method"
+// @Success 200 {string} json
+// @router /:method [get]
 func (c *ApiController) Get() {
 	method := c.Ctx.Input.Param(":method")
 

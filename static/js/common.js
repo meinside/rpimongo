@@ -30,7 +30,7 @@ function fetchAndRender(value, renderer)
 	renderer.spin(SPINNER_OPTIONS);
 
 	$.get(
-		"/api/" + value + ".json",
+		"/v1/api/" + value,
 		{},
 		function(json) {
 			var value = json["value"];

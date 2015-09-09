@@ -4,3 +4,8 @@
 conf/app.conf
 
 rpimongo
+
+*.tmp
+docs/
+swagger/
+routers/commentsRouter*

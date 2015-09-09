@@ -12,6 +12,13 @@ func init() {
 	// links
 	beego.Router("/links", &controllers.LinksController{})
 
-	// api
-	beego.Router("/api/:method.json", &controllers.ApiController{})
+	// api (namespace for swagger)
+	ns := beego.NewNamespace("/v1",
+		beego.NSNamespace("/api",
+			beego.NSInclude(
+				&controllers.ApiController{},
+			),
+		),
+	)
+	beego.AddNamespace(ns)
 }
