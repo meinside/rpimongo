@@ -10,7 +10,7 @@ $ go get github.com/beego/bee
 $ go get github.com/meinside/rpimongo
 ```
 
-## 2. setup
+## 2-1. setup for production
 
 ```
 $ cd $GOPATH/src/github.com/meinside/rpimongo
@@ -23,19 +23,48 @@ Example of **conf/app.conf**:
 ```
 appname = My RPiMonGo Server
 httpport = 8088
-runmode = production
+runmode = prod
 ```
 
-## 3. run
+and run it with:
 
 ```
 $ cd $GOPATH/src/github.com/meinside/rpimongo
 $ bee run
 ```
 
-then it can be accessed through: http://some.where:8088
+## 2-2. setup for testing APIs (swagger)
 
-## 4. run as service
+```
+$ cd $GOPATH/src/github.com/meinside/rpimongo
+$ cp conf/app.conf.sample conf/app.conf
+$ vi conf/app.conf
+```
+
+Example of **conf/app.conf**:
+
+```
+appname = My RPiMonGo Server
+httpaddr = 127.0.0.1
+httpport = 8088
+runmode = dev
+EnableDocs = true
+```
+
+and run it with:
+
+```
+$ cd $GOPATH/src/github.com/meinside/rpimongo
+$ bee run -downdoc=true -gendoc=true
+```
+
+## 3. access
+
+Then it can be accessed through: http://some.where:8088
+
+or through: http://127.0.0.1:8088/swagger/swagger-1/
+
+## 4. if you wanna run it as a service
 
 ### create init.d script
 
@@ -120,9 +149,9 @@ If you want it to launch on boot time:
 
 `$ sudo update-rc.d -f rpimongo defaults`
 
-## *(Optional)* 5. run with Apache2 + reverse proxy
+## *(Optional)* 5. how to run it with Apache2 + reverse proxy
 
-When used with apache2 and its reverse proxy, we can benefit from functionalities like access logs.
+When used with apache2 and its reverse proxy, we can benefit from its functionalities like access logs.
 
 ### install apache2's proxy module and set it up
 
@@ -163,3 +192,4 @@ $ sudo service apache2 restart
 ```
 
 then it can be accessed through: http://my.raspberry.pi:8080
+
