@@ -1,3 +1,10 @@
+// @APIVersion 0.0.1
+// @Title RPiMonGo Test API
+// @Description For testing JSON APIs for RPiMonGo
+// @Contact meinside@gmail.com
+// @TermsOfServiceUrl http://beego.me/
+// @License Apache 2.0
+// @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html
 package routers
 
 import (

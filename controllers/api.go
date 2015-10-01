@@ -10,6 +10,7 @@ type ApiResult struct {
 	Value  string `json:"value"`
 }
 
+// Operations about APIs
 type ApiController struct {
 	beego.Controller
 }
