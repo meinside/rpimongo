@@ -66,7 +66,9 @@ or through: http://127.0.0.1:8088/swagger/swagger-1/
 
 ## 4. if you wanna run it as a service
 
-### create init.d script
+### For init.d
+
+#### create init.d script
 
 ```
 $ sudo vi /etc/init.d/rpimongo
@@ -131,7 +133,7 @@ esac
 exit 0
 ```
 
-### setup & run
+#### setup & run
 
 Run it:
 
@@ -148,6 +150,46 @@ or stop it:
 If you want it to launch on boot time:
 
 `$ sudo update-rc.d -f rpimongo defaults`
+
+### For systemd
+
+```
+$ sudo vi /lib/systemd/system/rpimongo.service
+```
+
+```
+[Unit]
+Description=RPiMonGo
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=some_user
+Group=some_user
+WorkingDirectory=/somewhere/go/src/github.com/meinside/rpimongo
+ExecStart=/somewhere/go/src/github.com/meinside/rpimongo/rpimongo
+Restart=always
+RestartSec=5
+Environment=
+
+[Install]
+WantedBy=multi-user.target
+```
+
+and edit **User**, **Group**, **WorkingDirectory**, and **ExecStart** values.
+
+Make it autostart on every boot:
+
+```
+$ sudo systemctl enable rpimongo.service
+```
+
+and start it with:
+
+```
+$ sudo systemctl start rpimongo.service
+```
 
 ## *(Optional)* 5. how to run it with Apache2 + reverse proxy
 
