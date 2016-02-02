@@ -10,5 +10,5 @@ type IndexController struct {
 
 func (c *IndexController) Get() {
 	c.Layout = "layouts/layout.html"
-	c.TplNames = "index.tpl"
+	c.TplName = "index.tpl"
 }

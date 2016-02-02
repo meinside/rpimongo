@@ -10,5 +10,5 @@ type LinksController struct {
 
 func (c *LinksController) Get() {
 	c.Layout = "layouts/layout.html"
-	c.TplNames = "links.tpl"
+	c.TplName = "links.tpl"
 }

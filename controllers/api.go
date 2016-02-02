@@ -31,7 +31,7 @@ func (c *ApiController) Get() {
 	}
 
 	// enable CORS for dev (swagger)
-	if beego.RunMode == "dev" {
+	if beego.BConfig.RunMode == "dev" {
 		c.Ctx.Output.Header("Access-Control-Allow-Origin", "*")
 	}
 
@@ -40,5 +40,5 @@ func (c *ApiController) Get() {
 		Result: res,
 		Value:  val,
 	}
-	c.ServeJson()
+	c.ServeJSON()
 }

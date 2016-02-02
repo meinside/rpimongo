@@ -15,10 +15,10 @@ const (
 )
 
 var rootapi swagger.ResourceListing
-var apilist map[string]*swagger.ApiDeclaration
+var apilist map[string]*swagger.APIDeclaration
 
 func init() {
-	if beego.EnableDocs {
+	if beego.BConfig.WebConfig.EnableDocs {
 		err := json.Unmarshal([]byte(Rootinfo), &rootapi)
 		if err != nil {
 			beego.Error(err)
@@ -27,14 +27,14 @@ func init() {
 		if err != nil {
 			beego.Error(err)
 		}
-		beego.GlobalDocApi["Root"] = rootapi
+		beego.GlobalDocAPI["Root"] = rootapi
 		for k, v := range apilist {
-			for i, a := range v.Apis {
+			for i, a := range v.APIs {
 				a.Path = urlReplace(k + a.Path)
-				v.Apis[i] = a
+				v.APIs[i] = a
 			}
 			v.BasePath = BasePath
-			beego.GlobalDocApi[strings.Trim(k, "/")] = v
+			beego.GlobalDocAPI[strings.Trim(k, "/")] = v
 		}
 	}
 }
