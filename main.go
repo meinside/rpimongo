@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	_ "github.com/meinside/rpimongo/docs"
+
 	_ "github.com/meinside/rpimongo/routers"
 )
 

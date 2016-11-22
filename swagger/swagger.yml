@@ -1,0 +1,31 @@
+swagger: "2.0"
+info:
+  title: RPiMonGo Test API
+  description: For testing JSON APIs for RPiMonGo
+  version: 0.0.1
+  termsOfService: http://beego.me/
+  contact:
+    email: meinside@gmail.com
+  license:
+    name: Url http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /v1
+paths:
+  /api/{method}:
+    get:
+      tags:
+      - api
+      description: Query status from server
+      operationId: ApiController.read
+      parameters:
+      - in: path
+        name: method
+        description: status method
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} json'
+tags:
+- name: api
+  description: |
+    Operations about APIs
