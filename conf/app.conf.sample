@@ -1,5 +1,12 @@
 appname = rpimongo
+
+runmode = dev
+
+[dev]
 httpaddr = 127.0.0.1
 httpport = 8080
-runmode = dev
-EnableDocs = true
+enabledocs = true
+
+[prod]
+httpport = 80
+enablegzip = true
