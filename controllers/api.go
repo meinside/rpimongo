@@ -6,7 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 
-	"github.com/meinside/rpi-tools"
+	"github.com/meinside/rpi-tools/status"
 )
 
 type ApiResult struct {
@@ -51,22 +51,22 @@ func (c *ApiController) Get() {
 func readValue(method string) (result string, err error) {
 	switch method {
 	case "hostname": // hostname
-		return tools.Hostname()
+		return status.Hostname()
 	case "uname": // uname -a
-		return tools.Uname()
+		return status.Uname()
 	case "uptime": // uptime
-		return tools.Uptime()
+		return status.Uptime()
 	case "free_spaces": // df -h
-		return tools.FreeSpaces()
+		return status.FreeSpaces()
 	case "memory_split": // vcgencmd get_mem arm && vcgencmd get_mem gpu
-		splits, err := tools.MemorySplit()
+		splits, err := status.MemorySplit()
 		return strings.Join(splits, "\n"), err
 	case "free_memory": // free -o -h
-		return tools.FreeMemory()
+		return status.FreeMemory()
 	case "cpu_temperature": // vcgencmd measure_temp
-		return tools.CpuTemperature()
+		return status.CpuTemperature()
 	case "cpu_info": //cat /proc/cpuinfo
-		return tools.CpuInfo()
+		return status.CpuInfo()
 	default:
 		return "Error", fmt.Errorf("No such method: %s", method)
 	}
