@@ -1,8 +1,12 @@
 package controllers
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/astaxie/beego"
-	"github.com/meinside/rpimongo/lib"
+
+	"github.com/meinside/rpi-tools"
 )
 
 type ApiResult struct {
@@ -24,7 +28,7 @@ func (c *ApiController) Get() {
 	method := c.Ctx.Input.Param(":method")
 
 	var res, val string
-	if value, success := rpi.ReadValue(method); success {
+	if value, err := readValue(method); err == nil {
 		res, val = "ok", value
 	} else {
 		res, val = "error", value
@@ -41,4 +45,29 @@ func (c *ApiController) Get() {
 		Value:  val,
 	}
 	c.ServeJSON()
+}
+
+// Read system values with rpi-tools
+func readValue(method string) (result string, err error) {
+	switch method {
+	case "hostname": // hostname
+		return tools.Hostname()
+	case "uname": // uname -a
+		return tools.Uname()
+	case "uptime": // uptime
+		return tools.Uptime()
+	case "free_spaces": // df -h
+		return tools.FreeSpaces()
+	case "memory_split": // vcgencmd get_mem arm && vcgencmd get_mem gpu
+		splits, err := tools.MemorySplit()
+		return strings.Join(splits, "\n"), err
+	case "free_memory": // free -o -h
+		return tools.FreeMemory()
+	case "cpu_temperature": // vcgencmd measure_temp
+		return tools.CpuTemperature()
+	case "cpu_info": //cat /proc/cpuinfo
+		return tools.CpuInfo()
+	default:
+		return "Error", fmt.Errorf("No such method: %s", method)
+	}
 }
