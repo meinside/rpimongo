@@ -1,7 +1,7 @@
 *.swp
 .DS_Store
 
-conf/app.conf
+config.json
 
 rpimongo
 
