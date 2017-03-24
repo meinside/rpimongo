@@ -127,5 +127,5 @@ $ sudo a2ensite some-host
 $ sudo service apache2 restart
 ```
 
-then it can be accessed through: http://my.raspberry.pi:8080
+then it can be accessed through: `http://my.raspberry.pi:8080`
 
