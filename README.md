@@ -5,8 +5,6 @@ Raspberry Pi Monitoring with Go
 ## 1-1. install
 
 ```bash
-$ go get github.com/astaxie/beego
-$ go get github.com/beego/bee
 $ go get -d github.com/meinside/rpimongo
 ```
 
@@ -17,61 +15,35 @@ $ cd $GOPATH/src/github.com/meinside/rpimongo
 $ go build
 ```
 
-## 2-1. setup for production
+## 2. setup for production
 
 ```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
-$ cp conf/app.conf.sample conf/app.conf
-$ vi conf/app.conf
+$ cp config.json.sample config.json
+$ vi config.json
 ```
 
-Example of **conf/app.conf**:
+Example of **config.json**:
 
-```
-appname = My RPiMonGo Server
-httpport = 8088
-runmode = prod
+```json
+{
+  "port_number": 8088,
+  "verbose": false
+}
 ```
 
 and run it with:
 
 ```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
-$ bee run
-```
-
-## 2-2. setup for testing APIs (swagger)
-
-```bash
-$ cd $GOPATH/src/github.com/meinside/rpimongo
-$ cp conf/app.conf.sample conf/app.conf
-$ vi conf/app.conf
-```
-
-Example of **conf/app.conf**:
-
-```
-appname = My RPiMonGo Server
-httpaddr = 127.0.0.1
-httpport = 8088
-runmode = dev
-EnableDocs = true
-```
-
-and run it with:
-
-```bash
-$ cd $GOPATH/src/github.com/meinside/rpimongo
-$ bee run -downdoc=true -gendoc=true
+$ ./rpimongo
 ```
 
 ## 3. access
 
-Then it can be accessed through: http://some.where:8088
+Then it can be accessed through: `http://my.raspberry.pi:8088`
 
-or through: http://127.0.0.1:8088/swagger/swagger-1/
-
-## 4. if you wanna run it as a service
+## 4. run it as a service
 
 ### For systemd
 
