@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -89,12 +90,15 @@ func readConfig() (conf Config, err error) {
 func renderTemplate(w http.ResponseWriter, tmplName string) {
 	w.Header().Set("Content-Type", "text/html")
 
-	if err := templates.ExecuteTemplate(w, "layout.html", struct{}{}); err != nil {
-		if err := templates.ExecuteTemplate(w, tmplName, struct{}{}); err != nil {
+	buffer := new(bytes.Buffer)
+	if err := templates.ExecuteTemplate(buffer, tmplName, struct{}{}); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		if err := templates.ExecuteTemplate(w, "layout.html", map[string]interface{}{
+			"Content": template.HTML(buffer.String()),
+		}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	} else {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
