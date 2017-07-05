@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -15,6 +17,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/meinside/rpi-tools/status"
 )
@@ -22,14 +25,21 @@ import (
 const (
 	ConfigFilename = "config.json"
 
-	StaticDirname  = "static"
-	TimeoutSeconds = 10
+	StaticDirname      = "static"
+	TimeoutSeconds     = 10
+	IdleTimeoutSeconds = 60
+
+	CacheDirname = "./acme"
+
+	PortHttp  = 80
+	PortHttps = 443
 )
 
 // Struct for config file
 type Config struct {
-	PortNumber int  `json:"port_number"`
-	Verbose    bool `json:"verbose"`
+	Hostname string `json:"hostname"`
+	ServeSSL bool   `json:"serve_ssl,omitempty"`
+	Verbose  bool   `json:"verbose,omitempty"`
 }
 
 // Struct for json api result
@@ -135,20 +145,50 @@ func main() {
 			renderApiResult(w, vars["action"])
 		})
 
-		// start server
-		if conf.Verbose {
-			log.Printf("Listening on port: %d...", conf.PortNumber)
+		if conf.ServeSSL {
+			// start HTTPS server
+			manager := autocert.Manager{
+				Prompt: autocert.AcceptTOS,
+				HostPolicy: func(ctx context.Context, host string) error {
+					if host == conf.Hostname {
+						return nil
+					}
+					return fmt.Errorf("acme/autocert: host %s is not allowed", host)
+				},
+				Cache: autocert.DirCache(CacheDirname),
+			}
+			server := newServer(PortHttps, router)
+			server.TLSConfig = &tls.Config{GetCertificate: manager.GetCertificate}
+
+			go func() {
+				if conf.Verbose {
+					log.Printf("> HTTPS server starts listening...")
+				}
+				if err := server.ListenAndServeTLS("", ""); err != nil {
+					panic(err)
+				}
+			}()
 		}
-		server := &http.Server{
-			Handler:      router,
-			Addr:         fmt.Sprintf(":%d", conf.PortNumber),
-			WriteTimeout: TimeoutSeconds * time.Second,
-			ReadTimeout:  TimeoutSeconds * time.Second,
+
+		// start HTTP server
+		server := newServer(PortHttp, router)
+		if conf.Verbose {
+			log.Printf("> HTTP server starts listening...")
 		}
 		if err := server.ListenAndServe(); err != nil {
 			panic(err)
 		}
 	} else {
 		panic(err)
+	}
+}
+
+func newServer(port int, router *mux.Router) *http.Server {
+	return &http.Server{
+		Handler:      router,
+		Addr:         fmt.Sprintf(":%d", port),
+		WriteTimeout: TimeoutSeconds * time.Second,
+		ReadTimeout:  TimeoutSeconds * time.Second,
+		IdleTimeout:  IdleTimeoutSeconds * time.Second,
 	}
 }

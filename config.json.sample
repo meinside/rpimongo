@@ -1,4 +1,5 @@
 {
-  "port_number": 8080,
+  "hostname": "your.domain.name",
+  "serve_ssl": false,
   "verbose": true
 }
