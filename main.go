@@ -145,8 +145,8 @@ func main() {
 			renderApiResult(w, vars["action"])
 		})
 
+		// start HTTPS server
 		if conf.ServeSSL {
-			// start HTTPS server
 			manager := autocert.Manager{
 				Prompt: autocert.AcceptTOS,
 				HostPolicy: func(ctx context.Context, host string) error {
@@ -171,7 +171,16 @@ func main() {
 		}
 
 		// start HTTP server
-		server := newServer(PortHttp, router)
+		var server *http.Server
+		if conf.ServeSSL {
+			// redirect to HTTPS
+			router = mux.NewRouter()
+			router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				uri := "https://" + r.Host + r.URL.String()
+				http.Redirect(w, r, uri, http.StatusFound)
+			})
+		}
+		server = newServer(PortHttp, router)
 		if conf.Verbose {
 			log.Printf("> HTTP server starts listening...")
 		}
