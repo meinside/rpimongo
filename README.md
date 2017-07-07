@@ -1,21 +1,27 @@
 # RPiMonGo
 
-Raspberry Pi Monitoring with Go
+A simple web server for monitoring your Raspberry Pi system, built with Go.
 
-## 1-1. install
+It shows `hostname`, `uptime`, `CPU temperature`, `free disk spaces`, `memory split`, and `free memory`.
+
+If you own a public domain name, you can run in on HTTPS with the help of [Let's Encrypt](https://letsencrypt.org/).
+
+## 1. Install
 
 ```bash
 $ go get -d github.com/meinside/rpimongo
 ```
 
-## 1-2. build
+## 2. Build
 
 ```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
 $ go build
 ```
 
-## 2. setup for production
+## 3. Setup
+
+Copy the sample config file and edit it:
 
 ```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
@@ -33,7 +39,7 @@ Example of **config.json**:
 }
 ```
 
-and run it with:
+## 4. Run
 
 ```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
@@ -42,13 +48,13 @@ $ ./rpimongo
 
 **NOTE**: It listens on port 80 and 443, so it needs to be run with root privilege.
 
-## 3. access
+## 5. Access
 
 Then it can be accessed through: `http://my.domain.com` (and also `https://my.domain.com` if you set "serve_ssl" as true)
 
-## 4. run it as a service
+## 6. Run it as a service
 
-### For systemd
+### For systemd:
 
 ```bash
 $ sudo vi /lib/systemd/system/rpimongo.service
