@@ -33,10 +33,13 @@ const (
 
 	PortHttp  = 80
 	PortHttps = 443
+
+	DefaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
 )
 
 // Struct for config file
 type Config struct {
+	Title    string `json:"title"`
 	Hostname string `json:"hostname"`
 	ServeSSL bool   `json:"serve_ssl,omitempty"`
 	Verbose  bool   `json:"verbose,omitempty"`
@@ -87,6 +90,9 @@ func readConfig() (conf Config, err error) {
 	if file, err := ioutil.ReadFile(filepath.Join(path.Dir(filename), ConfigFilename)); err == nil {
 		var conf Config
 		if err := json.Unmarshal(file, &conf); err == nil {
+			if conf.Title == "" {
+				conf.Title = DefaultPageTitle
+			}
 			return conf, nil
 		} else {
 			return Config{}, err
@@ -97,7 +103,7 @@ func readConfig() (conf Config, err error) {
 }
 
 // Render html template
-func renderTemplate(w http.ResponseWriter, tmplName string) {
+func renderTemplate(w http.ResponseWriter, tmplName string, conf Config) {
 	w.Header().Set("Content-Type", "text/html")
 
 	buffer := new(bytes.Buffer)
@@ -105,6 +111,7 @@ func renderTemplate(w http.ResponseWriter, tmplName string) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		if err := templates.ExecuteTemplate(w, "layout.html", map[string]interface{}{
+			"Title":   conf.Title,
 			"Content": template.HTML(buffer.String()),
 		}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -135,10 +142,10 @@ func main() {
 		router := mux.NewRouter()
 		router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(StaticDirname))))
 		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			renderTemplate(w, "index.html")
+			renderTemplate(w, "index.html", conf)
 		})
 		router.HandleFunc("/links", func(w http.ResponseWriter, r *http.Request) {
-			renderTemplate(w, "links.html")
+			renderTemplate(w, "links.html", conf)
 		})
 		router.HandleFunc("/api/{action}.json", func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
