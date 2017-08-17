@@ -72,7 +72,7 @@ func readValue(method string) (result string, err error) {
 	case "memory_split": // vcgencmd get_mem arm && vcgencmd get_mem gpu
 		splits, err := status.MemorySplit()
 		return strings.Join(splits, "\n"), err
-	case "free_memory": // free -o -h
+	case "free_memory": // free -h
 		return status.FreeMemory()
 	case "cpu_temperature": // vcgencmd measure_temp
 		return status.CpuTemperature()
