@@ -140,21 +140,26 @@ func main() {
 	if conf, err := readConfig(); err == nil {
 		// route rules
 		router := mux.NewRouter()
+		// /static/
 		router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(StaticDirname))))
+		// index
 		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			renderTemplate(w, "index.html", conf)
 		})
+		// /links
 		router.HandleFunc("/links", func(w http.ResponseWriter, r *http.Request) {
 			renderTemplate(w, "links.html", conf)
 		})
+		// /api/*.json
 		router.HandleFunc("/api/{action}.json", func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
 			renderApiResult(w, vars["action"])
 		})
 
 		// start HTTPS server
+		var manager *autocert.Manager = nil
 		if conf.ServeSSL {
-			manager := autocert.Manager{
+			manager = &autocert.Manager{
 				Prompt: autocert.AcceptTOS,
 				HostPolicy: func(ctx context.Context, host string) error {
 					if host == conf.Hostname {
@@ -164,6 +169,7 @@ func main() {
 				},
 				Cache: autocert.DirCache(CacheDirname),
 			}
+
 			server := newServer(PortHttps, router)
 			server.TLSConfig = &tls.Config{GetCertificate: manager.GetCertificate}
 
@@ -178,21 +184,25 @@ func main() {
 		}
 
 		// start HTTP server
-		var server *http.Server
-		if conf.ServeSSL {
-			// redirect to HTTPS
-			router = mux.NewRouter()
-			router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				uri := "https://" + r.Host + r.URL.String()
-				http.Redirect(w, r, uri, http.StatusFound)
-			})
-		}
-		server = newServer(PortHttp, router)
-		if conf.Verbose {
-			log.Printf("> HTTP server starts listening...")
-		}
-		if err := server.ListenAndServe(); err != nil {
-			panic(err)
+		if manager == nil {
+			server := newServer(PortHttp, router)
+
+			if conf.Verbose {
+				log.Printf("> HTTP server starts listening...")
+			}
+
+			if err := server.ListenAndServe(); err != nil {
+				panic(err)
+			}
+		} else {
+			if conf.Verbose {
+				log.Printf("> HTTP server for 'http-01' challenge starts listening...")
+			}
+
+			// listening for `http-01` challenge
+			if err := http.ListenAndServe(":http", manager.HTTPHandler(nil)); err != nil {
+				panic(err)
+			}
 		}
 	} else {
 		panic(err)
