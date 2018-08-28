@@ -8,20 +8,26 @@ It shows `hostname`, `uptime`, `CPU temperature`, `free disk spaces`, `memory sp
 
 If you own a public domain name, you can run in on HTTPS with the help of [Let's Encrypt](https://letsencrypt.org/).
 
-## 1. Install
+## 1. Build
+
+### Since Go 1.11+
+
+```bash
+# clone this repository out of $GOPATH
+$ git clone https://github.com/meinside/rpimongo.git
+$ cd rpimongo
+$ go build
+```
+
+### Before Go 1.11
 
 ```bash
 $ go get -d github.com/meinside/rpimongo
-```
-
-## 2. Build
-
-```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
 $ go build
 ```
 
-## 3. Setup
+## 2. Configure
 
 Copy the sample config file and edit it:
 
@@ -41,7 +47,7 @@ Example of **config.json**:
 }
 ```
 
-## 4. Run
+## 3. Run
 
 ```bash
 $ cd $GOPATH/src/github.com/meinside/rpimongo
@@ -50,11 +56,11 @@ $ ./rpimongo
 
 **NOTE**: It listens on port 80 and 443, so it needs to be run with root privilege.
 
-## 5. Access
+## 4. Access
 
 Then it can be accessed through: `http://my.domain.com` (and also `https://my.domain.com` if you set "serve_ssl" as true)
 
-## 6. Run it as a service
+## 5. Run it as a service
 
 ### For systemd:
 
