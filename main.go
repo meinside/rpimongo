@@ -22,6 +22,7 @@ import (
 	"github.com/meinside/rpi-tools/status"
 )
 
+// constants
 const (
 	ConfigFilename = "config.json"
 
@@ -31,13 +32,13 @@ const (
 
 	CacheDirname = "./acme"
 
-	PortHttp  = 80
-	PortHttps = 443
+	PortHTTP  = 80
+	PortHTTPS = 443
 
 	DefaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
 )
 
-// Struct for config file
+// Config is a struct for config file
 type Config struct {
 	Title    string `json:"title"`
 	Hostname string `json:"hostname"`
@@ -45,8 +46,8 @@ type Config struct {
 	Verbose  bool   `json:"verbose,omitempty"`
 }
 
-// Struct for json api result
-type ApiResult struct {
+// APIResult is a struct for json api result
+type APIResult struct {
 	Result string `json:"result"`
 	Value  string `json:"value"`
 }
@@ -87,19 +88,19 @@ func readValue(method string) (result string, err error) {
 func readConfig() (conf Config, err error) {
 	_, filename, _, _ := runtime.Caller(0) // = __FILE__
 
-	if file, err := ioutil.ReadFile(filepath.Join(path.Dir(filename), ConfigFilename)); err == nil {
+	file, err := ioutil.ReadFile(filepath.Join(path.Dir(filename), ConfigFilename))
+
+	if err == nil {
 		var conf Config
-		if err := json.Unmarshal(file, &conf); err == nil {
+		if err = json.Unmarshal(file, &conf); err == nil {
 			if conf.Title == "" {
 				conf.Title = DefaultPageTitle
 			}
 			return conf, nil
-		} else {
-			return Config{}, err
 		}
-	} else {
-		return Config{}, err
 	}
+
+	return Config{}, err
 }
 
 // Render html template
@@ -120,16 +121,16 @@ func renderTemplate(w http.ResponseWriter, tmplName string, conf Config) {
 }
 
 // Render json api result
-func renderApiResult(w http.ResponseWriter, actionName string) {
+func renderAPIResult(w http.ResponseWriter, actionName string) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if result, err := readValue(actionName); err == nil {
-		json.NewEncoder(w).Encode(ApiResult{
+		json.NewEncoder(w).Encode(APIResult{
 			Result: "ok",
 			Value:  result,
 		})
 	} else {
-		json.NewEncoder(w).Encode(ApiResult{
+		json.NewEncoder(w).Encode(APIResult{
 			Result: "error",
 			Value:  err.Error(),
 		})
@@ -153,11 +154,11 @@ func main() {
 		// /api/*.json
 		router.HandleFunc("/api/{action}.json", func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
-			renderApiResult(w, vars["action"])
+			renderAPIResult(w, vars["action"])
 		})
 
 		// start HTTPS server
-		var manager *autocert.Manager = nil
+		var manager *autocert.Manager
 		if conf.ServeSSL {
 			manager = &autocert.Manager{
 				Prompt: autocert.AcceptTOS,
@@ -170,7 +171,7 @@ func main() {
 				Cache: autocert.DirCache(CacheDirname),
 			}
 
-			server := newServer(PortHttps, router)
+			server := newServer(PortHTTPS, router)
 			server.TLSConfig = &tls.Config{GetCertificate: manager.GetCertificate}
 
 			go func() {
@@ -185,7 +186,7 @@ func main() {
 
 		// start HTTP server
 		if manager == nil {
-			server := newServer(PortHttp, router)
+			server := newServer(PortHTTP, router)
 
 			if conf.Verbose {
 				log.Printf("> HTTP server starts listening...")
