@@ -48,7 +48,7 @@ $ cd $GOPATH/src/github.com/meinside/rpimongo
 $ ./rpimongo
 ```
 
-**NOTE**: It listens on port 80 and 443, so it needs to be run with root privilege.
+**NOTE**: It listens on port 80 and 443 (default), so it needs to be run with root privilege.
 
 ## 5. Access
 

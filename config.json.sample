@@ -2,5 +2,7 @@
   "title": "",
   "hostname": "your.domain.name",
   "serve_ssl": false,
+  "port_http": 8080,
+  "port_https": 4433,
   "verbose": true
 }

@@ -32,18 +32,20 @@ const (
 
 	CacheDirname = "./acme"
 
-	PortHTTP  = 80
-	PortHTTPS = 443
+	DefaultPortHTTP  = 80
+	DefaultPortHTTPS = 443
 
 	DefaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
 )
 
 // Config is a struct for config file
 type Config struct {
-	Title    string `json:"title"`
-	Hostname string `json:"hostname"`
-	ServeSSL bool   `json:"serve_ssl,omitempty"`
-	Verbose  bool   `json:"verbose,omitempty"`
+	Title     string `json:"title"`
+	Hostname  string `json:"hostname"`
+	ServeSSL  bool   `json:"serve_ssl,omitempty"`
+	PortHTTP  int    `json:"port_http,omitempty"`
+	PortHTTPS int    `json:"port_https,omitempty"`
+	Verbose   bool   `json:"verbose,omitempty"`
 }
 
 // APIResult is a struct for json api result
@@ -171,7 +173,12 @@ func main() {
 				Cache: autocert.DirCache(CacheDirname),
 			}
 
-			server := newServer(PortHTTPS, router)
+			port := conf.PortHTTPS
+			if port <= 0 {
+				port = DefaultPortHTTPS
+			}
+
+			server := newServer(port, router)
 			server.TLSConfig = &tls.Config{GetCertificate: manager.GetCertificate}
 
 			go func() {
@@ -186,7 +193,12 @@ func main() {
 
 		// start HTTP server
 		if manager == nil {
-			server := newServer(PortHTTP, router)
+			port := conf.PortHTTP
+			if port <= 0 {
+				port = DefaultPortHTTP
+			}
+
+			server := newServer(port, router)
 
 			if conf.Verbose {
 				log.Printf("> HTTP server starts listening...")
