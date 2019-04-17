@@ -10,9 +10,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"path"
+	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -88,17 +87,17 @@ func readValue(method string) (result string, err error) {
 
 // Read config file
 func readConfig() (conf Config, err error) {
-	_, filename, _, _ := runtime.Caller(0) // = __FILE__
-
-	file, err := ioutil.ReadFile(filepath.Join(path.Dir(filename), ConfigFilename))
-
-	if err == nil {
-		var conf Config
-		if err = json.Unmarshal(file, &conf); err == nil {
-			if conf.Title == "" {
-				conf.Title = DefaultPageTitle
+	var execFilepath string
+	if execFilepath, err = os.Executable(); err == nil {
+		var file []byte
+		if file, err = ioutil.ReadFile(filepath.Join(filepath.Dir(execFilepath), ConfigFilename)); err == nil {
+			var conf Config
+			if err = json.Unmarshal(file, &conf); err == nil {
+				if conf.Title == "" {
+					conf.Title = DefaultPageTitle
+				}
+				return conf, nil
 			}
-			return conf, nil
 		}
 	}
 
