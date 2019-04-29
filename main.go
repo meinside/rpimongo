@@ -23,7 +23,7 @@ import (
 
 // constants
 const (
-	ConfigFilename = "config.json"
+	configFilename = "config.json"
 
 	StaticDirname      = "static"
 	TimeoutSeconds     = 10
@@ -37,18 +37,19 @@ const (
 	DefaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
 )
 
-// Config is a struct for config file
-type Config struct {
-	Title     string `json:"title"`
-	Hostname  string `json:"hostname"`
-	ServeSSL  bool   `json:"serve_ssl,omitempty"`
-	PortHTTP  int    `json:"port_http,omitempty"`
-	PortHTTPS int    `json:"port_https,omitempty"`
-	Verbose   bool   `json:"verbose,omitempty"`
+// config is a struct for config file
+type config struct {
+	Title            string   `json:"title"`
+	Hostname         string   `json:"hostname"`
+	ServeSSL         bool     `json:"serve_ssl,omitempty"`
+	PortHTTP         int      `json:"port_http,omitempty"`
+	PortHTTPS        int      `json:"port_https,omitempty"`
+	RedactedKeywords []string `json:"redacted_keywords,omitempty"`
+	Verbose          bool     `json:"verbose,omitempty"`
 }
 
-// APIResult is a struct for json api result
-type APIResult struct {
+// apiResult is a struct for json api result
+type apiResult struct {
 	Result string `json:"result"`
 	Value  string `json:"value"`
 }
@@ -61,37 +62,58 @@ var templates = template.Must(template.ParseFiles(
 ))
 
 // Read system values with rpi-tools
-func readValue(method string) (result string, err error) {
+func readValue(method string, redactedKeywords []string) (result string, err error) {
 	switch method {
 	case "hostname": // hostname
-		return status.Hostname()
+		result, err = status.Hostname()
 	case "uname": // uname -a
-		return status.Uname()
+		result, err = status.Uname()
 	case "uptime": // uptime
-		return status.Uptime()
+		result, err = status.Uptime()
 	case "free_spaces": // df -h
-		return status.FreeSpaces()
+		result, err = status.FreeSpaces()
 	case "memory_split": // vcgencmd get_mem arm && vcgencmd get_mem gpu
-		splits, err := status.MemorySplit()
-		return strings.Join(splits, "\n"), err
+		var splits []string
+		splits, err = status.MemorySplit()
+		result = strings.Join(splits, "\n")
 	case "free_memory": // free -h
-		return status.FreeMemory()
+		result, err = status.FreeMemory()
 	case "cpu_temperature": // vcgencmd measure_temp
-		return status.CpuTemperature()
+		result, err = status.CpuTemperature()
 	case "cpu_info": //cat /proc/cpuinfo
-		return status.CpuInfo()
+		result, err = status.CpuInfo()
 	default:
-		return "Error", fmt.Errorf("No such method: %s", method)
+		result = "Error"
+		err = fmt.Errorf("No such method: %s", method)
 	}
+
+	// redact keywords
+	if err == nil {
+		result = redact(result, redactedKeywords)
+	}
+
+	return
+}
+
+func redact(str string, keywords []string) string {
+	for _, k := range keywords {
+		log.Printf("replacing: %s => %s", str, k)
+
+		str = strings.Replace(str, k, "*redacted*", -1)
+	}
+
+	log.Printf("after redact: %s", str)
+
+	return str
 }
 
 // Read config file
-func readConfig() (conf Config, err error) {
+func readConfig() (conf config, err error) {
 	var execFilepath string
 	if execFilepath, err = os.Executable(); err == nil {
 		var file []byte
-		if file, err = ioutil.ReadFile(filepath.Join(filepath.Dir(execFilepath), ConfigFilename)); err == nil {
-			var conf Config
+		if file, err = ioutil.ReadFile(filepath.Join(filepath.Dir(execFilepath), configFilename)); err == nil {
+			var conf config
 			if err = json.Unmarshal(file, &conf); err == nil {
 				if conf.Title == "" {
 					conf.Title = DefaultPageTitle
@@ -101,11 +123,11 @@ func readConfig() (conf Config, err error) {
 		}
 	}
 
-	return Config{}, err
+	return config{}, err
 }
 
 // Render html template
-func renderTemplate(w http.ResponseWriter, tmplName string, conf Config) {
+func renderTemplate(w http.ResponseWriter, tmplName string, conf config) {
 	w.Header().Set("Content-Type", "text/html")
 
 	buffer := new(bytes.Buffer)
@@ -122,16 +144,16 @@ func renderTemplate(w http.ResponseWriter, tmplName string, conf Config) {
 }
 
 // Render json api result
-func renderAPIResult(w http.ResponseWriter, actionName string) {
+func renderAPIResult(w http.ResponseWriter, actionName string, conf config) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if result, err := readValue(actionName); err == nil {
-		json.NewEncoder(w).Encode(APIResult{
+	if result, err := readValue(actionName, conf.RedactedKeywords); err == nil {
+		json.NewEncoder(w).Encode(apiResult{
 			Result: "ok",
 			Value:  result,
 		})
 	} else {
-		json.NewEncoder(w).Encode(APIResult{
+		json.NewEncoder(w).Encode(apiResult{
 			Result: "error",
 			Value:  err.Error(),
 		})
@@ -155,7 +177,7 @@ func main() {
 		// /api/*.json
 		router.HandleFunc("/api/{action}.json", func(w http.ResponseWriter, r *http.Request) {
 			vars := mux.Vars(r)
-			renderAPIResult(w, vars["action"])
+			renderAPIResult(w, vars["action"], conf)
 		})
 
 		// start HTTPS server

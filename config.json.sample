@@ -4,5 +4,6 @@
   "serve_ssl": false,
   "port_http": 8080,
   "port_https": 4433,
+  "redacted_keywords": [],
   "verbose": true
 }
