@@ -95,14 +95,11 @@ func readValue(method string, redactedKeywords []string) (result string, err err
 	return
 }
 
+// redact given string
 func redact(str string, keywords []string) string {
 	for _, k := range keywords {
-		log.Printf("replacing: %s => %s", str, k)
-
 		str = strings.Replace(str, k, "*redacted*", -1)
 	}
-
-	log.Printf("after redact: %s", str)
 
 	return str
 }
