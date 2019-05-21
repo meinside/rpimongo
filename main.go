@@ -25,16 +25,19 @@ import (
 const (
 	configFilename = "config.json"
 
-	StaticDirname      = "static"
-	TimeoutSeconds     = 10
-	IdleTimeoutSeconds = 60
+	staticDirname      = "static"
+	timeoutSeconds     = 10
+	idleTimeoutSeconds = 60
 
-	CacheDirname = "./acme"
+	cacheDirname = "./acme"
 
-	DefaultPortHTTP  = 80
-	DefaultPortHTTPS = 443
+	defaultPortHTTP  = 80
+	defaultPortHTTPS = 443
 
-	DefaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
+	defaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
+
+	robotsTxt = `User-agent: *
+Disallow: /`
 )
 
 // config is a struct for config file
@@ -113,7 +116,7 @@ func readConfig() (conf config, err error) {
 			var conf config
 			if err = json.Unmarshal(file, &conf); err == nil {
 				if conf.Title == "" {
-					conf.Title = DefaultPageTitle
+					conf.Title = defaultPageTitle
 				}
 				return conf, nil
 			}
@@ -161,8 +164,10 @@ func main() {
 	if conf, err := readConfig(); err == nil {
 		// route rules
 		router := mux.NewRouter()
+
 		// /static/
-		router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(StaticDirname))))
+		router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDirname))))
+
 		// index
 		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			renderTemplate(w, "index.html", conf)
@@ -177,6 +182,11 @@ func main() {
 			renderAPIResult(w, vars["action"], conf)
 		})
 
+		// /robots.txt
+		router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte(robotsTxt))
+		})
+
 		// start HTTPS server
 		var manager *autocert.Manager
 		if conf.ServeSSL {
@@ -188,12 +198,12 @@ func main() {
 					}
 					return fmt.Errorf("acme/autocert: host %s is not allowed", host)
 				},
-				Cache: autocert.DirCache(CacheDirname),
+				Cache: autocert.DirCache(cacheDirname),
 			}
 
 			port := conf.PortHTTPS
 			if port <= 0 {
-				port = DefaultPortHTTPS
+				port = defaultPortHTTPS
 			}
 
 			server := newServer(port, router)
@@ -213,7 +223,7 @@ func main() {
 		if manager == nil {
 			port := conf.PortHTTP
 			if port <= 0 {
-				port = DefaultPortHTTP
+				port = defaultPortHTTP
 			}
 
 			server := newServer(port, router)
@@ -244,8 +254,8 @@ func newServer(port int, router *mux.Router) *http.Server {
 	return &http.Server{
 		Handler:      router,
 		Addr:         fmt.Sprintf(":%d", port),
-		WriteTimeout: TimeoutSeconds * time.Second,
-		ReadTimeout:  TimeoutSeconds * time.Second,
-		IdleTimeout:  IdleTimeoutSeconds * time.Second,
+		WriteTimeout: timeoutSeconds * time.Second,
+		ReadTimeout:  timeoutSeconds * time.Second,
+		IdleTimeout:  idleTimeoutSeconds * time.Second,
 	}
 }
