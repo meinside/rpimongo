@@ -35,9 +35,6 @@ const (
 	defaultPortHTTPS = 443
 
 	defaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
-
-	robotsTxt = `User-agent: *
-Disallow: /`
 )
 
 // config is a struct for config file
@@ -165,9 +162,6 @@ func main() {
 		// route rules
 		router := mux.NewRouter()
 
-		// /static/
-		router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(staticDirname))))
-
 		// index
 		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			renderTemplate(w, "index.html", conf)
@@ -182,10 +176,8 @@ func main() {
 			renderAPIResult(w, vars["action"], conf)
 		})
 
-		// /robots.txt
-		router.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(robotsTxt))
-		})
+		// static files
+		router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(staticDirname))))
 
 		// start HTTPS server
 		var manager *autocert.Manager
@@ -211,7 +203,7 @@ func main() {
 
 			go func() {
 				if conf.Verbose {
-					log.Printf("> HTTPS server starts listening...")
+					log.Printf("https server starts listening on port %d...", port)
 				}
 				if err := server.ListenAndServeTLS("", ""); err != nil {
 					panic(err)
@@ -229,7 +221,7 @@ func main() {
 			server := newServer(port, router)
 
 			if conf.Verbose {
-				log.Printf("> HTTP server starts listening...")
+				log.Printf("http server starts listening on port %d...", port)
 			}
 
 			if err := server.ListenAndServe(); err != nil {
@@ -237,7 +229,7 @@ func main() {
 			}
 		} else {
 			if conf.Verbose {
-				log.Printf("> HTTP server for 'http-01' challenge starts listening...")
+				log.Printf("http server for 'http-01' challenge starts listening...")
 			}
 
 			// listening for `http-01` challenge
