@@ -80,6 +80,8 @@ func readValue(method string, redactedKeywords []string) (result string, err err
 		result, err = status.FreeMemory()
 	case "cpu_temperature": // vcgencmd measure_temp
 		result, err = status.CpuTemperature()
+	case "cpu_frequency": // vcgencmd measure_clock arm
+		result, err = status.CpuFrequency()
 	case "cpu_info": //cat /proc/cpuinfo
 		result, err = status.CpuInfo()
 	default:
