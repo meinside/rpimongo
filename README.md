@@ -4,7 +4,7 @@ A simple web server for monitoring your Raspberry Pi system, built with Go.
 
 It shows `hostname`, `uptime`, `CPU temperature`, `free disk spaces`, `memory split`, and `free memory`.
 
-![screenshot](https://user-images.githubusercontent.com/185988/27938333-4e6b4ae4-62f8-11e7-809f-65113ff397c8.png)
+![rpimongo](https://user-images.githubusercontent.com/185988/60861114-387a4300-a254-11e9-8d7a-0a8f146a9462.jpg)
 
 If you own a public domain name, you can run in on HTTPS with the help of [Let's Encrypt](https://letsencrypt.org/).
 
