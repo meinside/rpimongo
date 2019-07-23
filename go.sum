@@ -1,7 +1,7 @@
 github.com/gorilla/mux v1.7.3 h1:gnP5JzjVOuiZD07fKKToCAOjS0yOpj/qPETTXCCS6hw=
 github.com/gorilla/mux v1.7.3/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
-github.com/meinside/rpi-tools v0.1.2 h1:KGdGnLtpbcKnNOTmvuvdOAg2iGZTpz30jrHnzKHLhgY=
-github.com/meinside/rpi-tools v0.1.2/go.mod h1:4p9tXh1Om0VIxADfedma+2E64gV+/gYwEjlk+2Dcb8U=
+github.com/meinside/rpi-tools v0.1.3 h1:OYnrEKXobAU5xxagllPJk0RFjeZmYLIdl7/j3XtLoLs=
+github.com/meinside/rpi-tools v0.1.3/go.mod h1:4p9tXh1Om0VIxADfedma+2E64gV+/gYwEjlk+2Dcb8U=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 h1:HuIa8hRrWRSrqYzx1qI49NNxhdi2PrY7gxVSq1JjLDc=
 golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
