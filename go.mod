@@ -1,9 +1,9 @@
 module github.com/meinside/rpimongo
 
-go 1.14
+go 1.15
 
 require (
-	github.com/gorilla/mux v1.7.4
+	github.com/gorilla/mux v1.8.0
 	github.com/meinside/rpi-tools v0.1.3
-	golang.org/x/crypto v0.0.0-20200420201142-3c4aac89819a
+	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897
 )
