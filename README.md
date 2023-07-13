@@ -8,23 +8,10 @@ It shows `hostname`, `uptime`, `CPU temperature`, `free disk spaces`, `memory sp
 
 If you own a public domain name, you can run in on HTTPS with the help of [Let's Encrypt](https://letsencrypt.org/).
 
-## 1. Build
-
-### Since Go 1.11+
+## 1. Install
 
 ```bash
-# clone this repository out of $GOPATH
-$ git clone https://github.com/meinside/rpimongo.git
-$ cd rpimongo
-$ go build
-```
-
-### Before Go 1.11
-
-```bash
-$ go get -d github.com/meinside/rpimongo
-$ cd $GOPATH/src/github.com/meinside/rpimongo
-$ go build
+$ go install github.com/meinside/rpimongo@latest
 ```
 
 ## 2. Configure
@@ -32,9 +19,9 @@ $ go build
 Copy the sample config file and edit it:
 
 ```bash
-$ cd $GOPATH/src/github.com/meinside/rpimongo
-$ cp config.json.sample config.json
-$ vi config.json
+$ git clone https://github.com/meinside/rpimongo.git
+$ cp rpimongo/config.json.sample /path/to/config.json
+$ vi /path/to/config.json
 ```
 
 Example of **config.json**:
@@ -42,19 +29,25 @@ Example of **config.json**:
 ```json
 {
   "hostname": "my.domain.com",
-  "serve_ssl": true,
+  "serve_ssl": false,
+  "port_http": 9999,
   "verbose": false
 }
 ```
 
 ## 3. Run
 
+Run with the path to your config file:
+
 ```bash
-$ cd $GOPATH/src/github.com/meinside/rpimongo
-$ ./rpimongo
+$ rpimongo /path/to/config.json
 ```
 
-**NOTE**: It listens on port 80 and 443 (default), so it needs to be run with root privilege.
+NOTE: If it is run on port 80 and/or 443, it needs root privilige:
+
+```bash
+$ sudo rpimongo /path/to/config.json
+```
 
 ## 4. Access
 
@@ -78,8 +71,8 @@ After=network.target
 Type=simple
 User=root
 Group=root
-WorkingDirectory=/somewhere/go/src/github.com/meinside/rpimongo
-ExecStart=/somewhere/go/src/github.com/meinside/rpimongo/rpimongo
+WorkingDirectory=/dir/to/config
+ExecStart=/somewhere/rpimongo/is/installed/rpimongo config.json
 Restart=always
 RestartSec=5
 Environment=

@@ -24,8 +24,6 @@ import (
 
 // constants
 const (
-	configFilename = "config.json"
-
 	staticDirname      = "static"
 	timeoutSeconds     = 10
 	idleTimeoutSeconds = 60
@@ -36,11 +34,17 @@ const (
 	defaultPortHTTPS = 443
 
 	defaultPageTitle = "RPiMonGo: Raspberry Pi Monitoring with Go"
+
+	usageTextFormat = `Usage:
+
+	$ %[1]s [config_filepath]
+`
 )
 
 // config is a struct for config file
 type config struct {
 	Title            string   `json:"title"`
+	Version          string   `json:"version"`
 	Hostname         string   `json:"hostname"`
 	ServeSSL         bool     `json:"serve_ssl,omitempty"`
 	PortHTTP         int      `json:"port_http,omitempty"`
@@ -110,18 +114,17 @@ func redact(str string, keywords []string) string {
 }
 
 // Read config file
-func readConfig() (conf config, err error) {
-	var execFilepath string
-	if execFilepath, err = os.Executable(); err == nil {
-		var file []byte
-		if file, err = ioutil.ReadFile(filepath.Join(filepath.Dir(execFilepath), configFilename)); err == nil {
-			var conf config
-			if err = json.Unmarshal(file, &conf); err == nil {
-				if conf.Title == "" {
-					conf.Title = defaultPageTitle
-				}
-				return conf, nil
+func readConfig(configFilepath string) (conf config, err error) {
+	var file []byte
+	if file, err = ioutil.ReadFile(configFilepath); err == nil {
+		var conf config
+		if err = json.Unmarshal(file, &conf); err == nil {
+			if conf.Title == "" {
+				conf.Title = defaultPageTitle
 			}
+			conf.Version = version.Minimum()
+
+			return conf, nil
 		}
 	}
 
@@ -139,7 +142,7 @@ func renderTemplate(w http.ResponseWriter, tmplName string, conf config) {
 		if err := templates.ExecuteTemplate(w, "layout.html", map[string]interface{}{
 			"Title":   conf.Title,
 			"Content": template.HTML(buffer.String()),
-			"Version": version.Minimum(),
+			"Version": conf.Version,
 		}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -164,87 +167,93 @@ func renderAPIResult(w http.ResponseWriter, actionName string, conf config) {
 }
 
 func main() {
-	if conf, err := readConfig(); err == nil {
-		// route rules
-		router := mux.NewRouter()
+	if len(os.Args) > 1 {
+		configFilepath := os.Args[1]
 
-		// index
-		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			renderTemplate(w, "index.html", conf)
-		})
-		// /links
-		router.HandleFunc("/links", func(w http.ResponseWriter, r *http.Request) {
-			renderTemplate(w, "links.html", conf)
-		})
-		// /api/*.json
-		router.HandleFunc("/api/{action}.json", func(w http.ResponseWriter, r *http.Request) {
-			vars := mux.Vars(r)
-			renderAPIResult(w, vars["action"], conf)
-		})
+		if conf, err := readConfig(configFilepath); err == nil {
+			// route rules
+			router := mux.NewRouter()
 
-		// static files
-		router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(staticDirname))))
+			// index
+			router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				renderTemplate(w, "index.html", conf)
+			})
+			// /links
+			router.HandleFunc("/links", func(w http.ResponseWriter, r *http.Request) {
+				renderTemplate(w, "links.html", conf)
+			})
+			// /api/*.json
+			router.HandleFunc("/api/{action}.json", func(w http.ResponseWriter, r *http.Request) {
+				vars := mux.Vars(r)
+				renderAPIResult(w, vars["action"], conf)
+			})
 
-		// start HTTPS server
-		var manager *autocert.Manager
-		if conf.ServeSSL {
-			manager = &autocert.Manager{
-				Prompt: autocert.AcceptTOS,
-				HostPolicy: func(ctx context.Context, host string) error {
-					if host == conf.Hostname {
-						return nil
-					}
-					return fmt.Errorf("acme/autocert: host %s is not allowed", host)
-				},
-				Cache: autocert.DirCache(cacheDirname),
-			}
+			// static files
+			router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir(staticDirname))))
 
-			port := conf.PortHTTPS
-			if port <= 0 {
-				port = defaultPortHTTPS
-			}
-
-			server := newServer(port, router)
-			server.TLSConfig = &tls.Config{GetCertificate: manager.GetCertificate}
-
-			go func() {
-				if conf.Verbose {
-					log.Printf("https server starts listening on port %d...", port)
+			// start HTTPS server
+			var manager *autocert.Manager
+			if conf.ServeSSL {
+				manager = &autocert.Manager{
+					Prompt: autocert.AcceptTOS,
+					HostPolicy: func(ctx context.Context, host string) error {
+						if host == conf.Hostname {
+							return nil
+						}
+						return fmt.Errorf("acme/autocert: host %s is not allowed", host)
+					},
+					Cache: autocert.DirCache(cacheDirname),
 				}
-				if err := server.ListenAndServeTLS("", ""); err != nil {
+
+				port := conf.PortHTTPS
+				if port <= 0 {
+					port = defaultPortHTTPS
+				}
+
+				server := newServer(port, router)
+				server.TLSConfig = &tls.Config{GetCertificate: manager.GetCertificate}
+
+				go func() {
+					if conf.Verbose {
+						log.Printf("https server starts listening on port %d...", port)
+					}
+					if err := server.ListenAndServeTLS("", ""); err != nil {
+						panic(err)
+					}
+				}()
+			}
+
+			// start HTTP server
+			if manager == nil {
+				port := conf.PortHTTP
+				if port <= 0 {
+					port = defaultPortHTTP
+				}
+
+				server := newServer(port, router)
+
+				if conf.Verbose {
+					log.Printf("http server starts listening on port %d...", port)
+				}
+
+				if err := server.ListenAndServe(); err != nil {
 					panic(err)
 				}
-			}()
-		}
+			} else {
+				if conf.Verbose {
+					log.Printf("http server for 'http-01' challenge starts listening...")
+				}
 
-		// start HTTP server
-		if manager == nil {
-			port := conf.PortHTTP
-			if port <= 0 {
-				port = defaultPortHTTP
-			}
-
-			server := newServer(port, router)
-
-			if conf.Verbose {
-				log.Printf("http server starts listening on port %d...", port)
-			}
-
-			if err := server.ListenAndServe(); err != nil {
-				panic(err)
+				// listening for `http-01` challenge
+				if err := http.ListenAndServe(":http", manager.HTTPHandler(nil)); err != nil {
+					panic(err)
+				}
 			}
 		} else {
-			if conf.Verbose {
-				log.Printf("http server for 'http-01' challenge starts listening...")
-			}
-
-			// listening for `http-01` challenge
-			if err := http.ListenAndServe(":http", manager.HTTPHandler(nil)); err != nil {
-				panic(err)
-			}
+			panic(err)
 		}
 	} else {
-		panic(err)
+		fmt.Printf(usageTextFormat, filepath.Base(os.Args[0]))
 	}
 }
 
