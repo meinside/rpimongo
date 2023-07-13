@@ -19,6 +19,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/meinside/rpi-tools/status"
+	"github.com/meinside/version-go"
 )
 
 // constants
@@ -138,6 +139,7 @@ func renderTemplate(w http.ResponseWriter, tmplName string, conf config) {
 		if err := templates.ExecuteTemplate(w, "layout.html", map[string]interface{}{
 			"Title":   conf.Title,
 			"Content": template.HTML(buffer.String()),
+			"Version": version.Minimum(),
 		}); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
