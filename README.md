@@ -58,7 +58,7 @@ Then it can be accessed through: `http://my.domain.com` (and also `https://my.do
 ### For systemd:
 
 ```bash
-$ sudo vi /lib/systemd/system/rpimongo.service
+$ sudo vi /etc/systemd/system/rpimongo.service
 ```
 
 ```
