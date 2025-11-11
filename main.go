@@ -38,6 +38,8 @@ const (
 
 	$ %[1]s [config_filepath]
 `
+
+	redactedText = `*redacted*`
 )
 
 // config is a struct for config file
@@ -65,33 +67,46 @@ var templates = template.Must(template.ParseFiles(
 	"tpl/links.html",
 ))
 
+const (
+	methodHostname       = `hostname`
+	methodUname          = `uname`
+	methodUptime         = `uptime`
+	methodFreeSpaces     = `free_spaces`
+	methodMemorySplit    = `memory_split`
+	methodFreeMemory     = `free_memory`
+	methodCPUTemperature = `cpu_temperature`
+	methodCPUFrequency   = `cpu_frequency`
+	methodCPUThrottled   = `cpu_throttled`
+	methodCPUInfo        = `cpu_info`
+)
+
 // Read system values with rpi-tools
 func readValue(
 	method string,
 	redactedKeywords []string,
 ) (result string, err error) {
 	switch method {
-	case "hostname": // hostname
+	case methodHostname: // hostname
 		result, err = status.Hostname()
-	case "uname": // uname -a
+	case methodUname: // uname -a
 		result, err = status.Uname()
-	case "uptime": // uptime
+	case methodUptime: // uptime
 		result, err = status.Uptime()
-	case "free_spaces": // df -h
+	case methodFreeSpaces: // df -h
 		result, err = status.FreeSpaces()
-	case "memory_split": // vcgencmd get_mem arm && vcgencmd get_mem gpu
+	case methodMemorySplit: // vcgencmd get_mem arm && vcgencmd get_mem gpu
 		var splits []string
 		splits, err = status.MemorySplit()
 		result = strings.Join(splits, "\n")
-	case "free_memory": // free -h
+	case methodFreeMemory: // free -h
 		result, err = status.FreeMemory()
-	case "cpu_temperature": // vcgencmd measure_temp
+	case methodCPUTemperature: // vcgencmd measure_temp
 		result, err = status.CPUTemperature()
-	case "cpu_frequency": // vcgencmd measure_clock arm
+	case methodCPUFrequency: // vcgencmd measure_clock arm
 		result, err = status.CPUFrequency()
-	case "cpu_throttled": // vcgencmd get_throttled
+	case methodCPUThrottled: // vcgencmd get_throttled
 		result, err = status.CPUThrottled()
-	case "cpu_info": // cat /proc/cpuinfo
+	case methodCPUInfo: // cat /proc/cpuinfo
 		result, err = status.CPUInfo()
 	default:
 		result = "Error"
@@ -109,7 +124,7 @@ func readValue(
 // redact given string
 func redact(str string, keywords []string) string {
 	for _, k := range keywords {
-		str = strings.ReplaceAll(str, k, "*redacted*")
+		str = strings.ReplaceAll(str, k, redactedText)
 	}
 
 	return str
@@ -135,7 +150,7 @@ func readConfig(configFilepath string) (conf config, err error) {
 
 // Render html template
 func renderTemplate(w http.ResponseWriter, tmplName string, conf config) {
-	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set(`Content-Type`, `text/html`)
 
 	buffer := new(bytes.Buffer)
 	if err := templates.ExecuteTemplate(buffer, tmplName, struct{}{}); err != nil {
@@ -153,16 +168,16 @@ func renderTemplate(w http.ResponseWriter, tmplName string, conf config) {
 
 // Render json api result
 func renderAPIResult(w http.ResponseWriter, actionName string, conf config) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(`Content-Type`, `application/json`)
 
 	if result, err := readValue(actionName, conf.RedactedKeywords); err == nil {
 		json.NewEncoder(w).Encode(apiResult{
-			Result: "ok",
+			Result: `ok`,
 			Value:  result,
 		})
 	} else {
 		json.NewEncoder(w).Encode(apiResult{
-			Result: "error",
+			Result: `error`,
 			Value:  err.Error(),
 		})
 	}
