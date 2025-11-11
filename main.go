@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -67,7 +66,10 @@ var templates = template.Must(template.ParseFiles(
 ))
 
 // Read system values with rpi-tools
-func readValue(method string, redactedKeywords []string) (result string, err error) {
+func readValue(
+	method string,
+	redactedKeywords []string,
+) (result string, err error) {
 	switch method {
 	case "hostname": // hostname
 		result, err = status.Hostname()
@@ -84,13 +86,13 @@ func readValue(method string, redactedKeywords []string) (result string, err err
 	case "free_memory": // free -h
 		result, err = status.FreeMemory()
 	case "cpu_temperature": // vcgencmd measure_temp
-		result, err = status.CpuTemperature()
+		result, err = status.CPUTemperature()
 	case "cpu_frequency": // vcgencmd measure_clock arm
-		result, err = status.CpuFrequency()
+		result, err = status.CPUFrequency()
 	case "cpu_throttled": // vcgencmd get_throttled
-		result, err = status.CpuThrottled()
-	case "cpu_info": //cat /proc/cpuinfo
-		result, err = status.CpuInfo()
+		result, err = status.CPUThrottled()
+	case "cpu_info": // cat /proc/cpuinfo
+		result, err = status.CPUInfo()
 	default:
 		result = "Error"
 		err = fmt.Errorf("No such method: %s", method)
@@ -107,7 +109,7 @@ func readValue(method string, redactedKeywords []string) (result string, err err
 // redact given string
 func redact(str string, keywords []string) string {
 	for _, k := range keywords {
-		str = strings.Replace(str, k, "*redacted*", -1)
+		str = strings.ReplaceAll(str, k, "*redacted*")
 	}
 
 	return str
@@ -116,7 +118,7 @@ func redact(str string, keywords []string) string {
 // Read config file
 func readConfig(configFilepath string) (conf config, err error) {
 	var file []byte
-	if file, err = ioutil.ReadFile(configFilepath); err == nil {
+	if file, err = os.ReadFile(configFilepath); err == nil {
 		var conf config
 		if err = json.Unmarshal(file, &conf); err == nil {
 			if conf.Title == "" {
@@ -139,7 +141,7 @@ func renderTemplate(w http.ResponseWriter, tmplName string, conf config) {
 	if err := templates.ExecuteTemplate(buffer, tmplName, struct{}{}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
-		if err := templates.ExecuteTemplate(w, "layout.html", map[string]interface{}{
+		if err := templates.ExecuteTemplate(w, "layout.html", map[string]any{
 			"Title":   conf.Title,
 			"Content": template.HTML(buffer.String()),
 			"Version": conf.Version,
