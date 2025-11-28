@@ -95,3 +95,31 @@ and start it manually with:
 $ sudo systemctl start rpimongo.service
 ```
 
+### Serve behind a Tailnet
+
+Funnel the service with:
+
+```bash
+$ sudo tailscale funnel --bg 9999
+```
+
+and setup for reverse proxy like:
+
+```nginx
+# (nginx)
+server {
+	listen 80;
+	listen [::]:80;
+	server_name xxxx.yyyy-zzzz.ts.net;
+
+	return 301 https://$server_name$request_uri;
+}
+```
+
+If certificates are needed:
+
+```bash
+# NOTE: also run it with crontab for renewing certificates
+$ sudo tailscale cert --cert-file /path/to/certs/cert.crt --key-file /path/to/certs/cert.key "xxxx.yyyy-zzzz.ts.net"
+```
+
