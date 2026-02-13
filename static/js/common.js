@@ -6,6 +6,9 @@ var SPINNER_OPTIONS = {
 	length: 3,
 	width: 2,
 	radius: 3,
+	top: '50%',
+	left: '50%',
+	position: 'absolute',
 };
 
 /*
