@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
   <head>
     <title>{{ .Title }}</title>
     <link rel="shortcut icon" href="/img/favicon.ico">
@@ -41,9 +40,9 @@
     </script>
     <script src="/js/jquery.spin.js" defer></script>
   </head>
-  <body>
+  <body class="d-flex flex-column h-100">
     <!-- header -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
       <div class="container">
         <a class="navbar-brand" href="/">
           <i class="bi bi-house"></i> Home
@@ -62,13 +61,13 @@
         </div>
       </div>
     </nav>
-    <div class="container">
+    <main class="flex-shrink-0 container py-3">
       <!-- content starts here -->
       {{ .Content }}
       <!-- content ends here -->
-    </div>
+    </main>
     <!-- footer -->
-    <footer class="footer mt-auto py-3 bg-dark fixed-bottom">
+    <footer class="footer mt-auto py-3 bg-dark">
       <div class="container text-center">
         <span class="text-white-50 credit">
           {{ .Version }} / Powered by <a href="https://golang.org/" target="_blank" class="text-white">Golang</a> and
