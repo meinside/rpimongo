@@ -3,6 +3,8 @@ html, body {
 }
 
 body {
+  /* padding-top removed for sticky navbar */
+  /* padding-top: 4.5rem; */
   background-color: #000000;
   color: #FFFFFF;
   font-family: Hack, monospace;
