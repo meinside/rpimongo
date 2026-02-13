@@ -2,57 +2,27 @@ html {
   position: relative;
   min-height: 100%;
 }
-body {
-  /* margin bottom by footer height */
-  margin-bottom: 30px;
-}
-
-.navbar-nav > li > a, .navbar-brand {
-  padding-top:5px !important;
-  padding-bottom:0 !important;
-  height: 30px;
-}
-.navbar {
-  min-height:30px !important;
-}
-
-/* Set the fixed height of the footer here */
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* fixed height of the footer */
-  height: 30px;
-  background-color: #f5f5f5;
-}
-
-/* Custom page CSS
--------------------------------------------------- */
-body > .container {
-  padding: 30px 15px 15px;
-}
-.container .credit {
-  margin: 5px 0;
-}
-
-.footer > .container {
-  padding-left: 10px;
-  padding-right: 10px;
-  z-index: 1;
-}
-
-code {
-  font-size: 80%;
-}
 
 body {
+  /* padding for fixed header and footer */
+  padding-top: 70px;
+  padding-bottom: 60px;
   background-color: #000000;
   color: #FFFFFF;
   font-family: Hack, monospace;
   background-repeat: no-repeat;
   background-attachment: fixed;
-
   font-size: 12px;
+}
+
+/* Custom page CSS
+-------------------------------------------------- */
+.container .credit {
+  margin: 5px 0;
+}
+
+code {
+  font-size: 80%;
 }
 
 a:link {
@@ -109,9 +79,11 @@ div.server-stat > pre.stat {
   color: #A0A0A0;
   font-size: 8px;
   border: none;
-  position: relative;
+  position: relative !important;
+  min-height: 30px;
+  padding: 5px;
 }
-div.server-stat > span.refresh {
+div.server-stat > .refresh {
   margin-left: 10px;
   cursor: pointer;
 }
